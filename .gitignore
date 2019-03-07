@@ -1,0 +1,8 @@
+.idea/*
+*DS_Store*
+scripts/sts_assume_role/sasser_assume_role.py
+*-packaged.yaml
+.*.un*
+.*.sw*
+*bash.exe.stackdump
+*.iml
