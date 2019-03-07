@@ -1,0 +1,461 @@
+---
+
+# 
+# Filename    : aws-simple-stackset/20-network-setup/vpc-subnet-igw-paramstore.yml
+# Date        : 06 Mar 2019
+# Author      : Balaji Venkataraman (xbalaji@gmail.com)
+# Description : create VPC, Public, Private Subnet, associate with Internet 
+#               Gateway, save them in parameter store for other stacks to use
+#   
+#
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create Dev, Test, Prod, Tools VPCs and save the details in AWS parameter store
+
+Parameters:
+  pEnvironment:
+    Type: String
+    Default: "Dev"
+    AllowedValues:
+      - "Dev"
+      - "Test"
+      - "Prod"
+      - "Tools"
+  pBusinessUnit:
+    Type: String
+    Default: "BU1"
+    AllowedValues:
+      - "BU1"
+      - "BU2"
+Mappings:
+  mapCidrBlock:
+    Dev:
+      VPC: "10.1.0.0/16"
+      SubnetPubAZa: "10.1.1.0/24"
+      SubnetPubAZb: "10.1.2.0/24"
+      SubnetPubAZc: "10.1.3.0/24"
+      SubnetPrvAZa: "10.1.11.0/24"
+      SubnetPrvAZb: "10.1.12.0/24"
+      SubnetPrvAZc: "10.1.13.0/24"
+    Test:
+      VPC: "10.2.0.0/16"
+      SubnetPubAZa: "10.2.1.0/24"
+      SubnetPubAZb: "10.2.2.0/24"
+      SubnetPubAZc: "10.2.3.0/24"
+      SubnetPrvAZa: "10.2.11.0/24"
+      SubnetPrvAZb: "10.2.12.0/24"
+      SubnetPrvAZc: "10.2.13.0/24"
+    Prod:
+      VPC: "10.3.0.0/16"
+      SubnetPubAZa: "10.3.1.0/24"
+      SubnetPubAZb: "10.3.2.0/24"
+      SubnetPubAZc: "10.3.3.0/24"
+      SubnetPrvAZa: "10.3.11.0/24"
+      SubnetPrvAZb: "10.3.12.0/24"
+      SubnetPrvAZc: "10.3.13.0/24"
+    Tools:
+      VPC: "10.4.0.0/16"
+      SubnetPubAZa: "10.4.1.0/24"
+      SubnetPubAZb: "10.4.2.0/24"
+      SubnetPubAZc: "10.4.3.0/24"
+      SubnetPrvAZa: "10.4.11.0/24"
+      SubnetPrvAZb: "10.4.12.0/24"
+      SubnetPrvAZc: "10.4.13.0/24"
+  RegionMap:
+    AWSZone:
+      AZa: "us-west-2a"
+      AZb: "us-west-2b"
+      AZc: "us-west-2c"
+    AWSZoneStr:
+      AZa: "AZa"
+      AZb: "AZb"
+      AZc: "AZc"
+
+Resources:
+  rVPC:
+    Type: "AWS::EC2::VPC"
+    DeletionPolicy: Retain
+    Properties:
+      CidrBlock: !FindInMap [ mapCidrBlock, Ref: pEnvironment, VPC]
+      EnableDnsSupport: True
+      EnableDnsHostnames: True
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - VPC
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  rSubnetPublicAZa:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref rVPC
+      CidrBlock: !FindInMap [ mapCidrBlock, Ref: pEnvironment, SubnetPubAZa]
+      AvailabilityZone: !FindInMap [ RegionMap, AWSZone, AZa]
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - "Pub"
+                - !FindInMap [ RegionMap, AWSZoneStr, AZa ]
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  rSubnetPublicAZb:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref rVPC
+      CidrBlock: !FindInMap [ mapCidrBlock, Ref: pEnvironment, SubnetPubAZb]
+      AvailabilityZone: !FindInMap [ RegionMap, AWSZone, AZb]
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - "Pub"
+                - !FindInMap [ RegionMap, AWSZoneStr, AZb ]
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  rSubnetPublicAZc:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref rVPC
+      CidrBlock: !FindInMap [ mapCidrBlock, Ref: pEnvironment, SubnetPubAZc]
+      AvailabilityZone: !FindInMap [ RegionMap, AWSZone, AZc]
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - "Pub"
+                - !FindInMap [ RegionMap, AWSZoneStr, AZc ]
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  rSubnetPrivateAZa:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref rVPC
+      CidrBlock: !FindInMap [ mapCidrBlock, Ref: pEnvironment, SubnetPrvAZa]
+      AvailabilityZone: !FindInMap [ RegionMap, AWSZone, AZa]
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - "Prv"
+                - !FindInMap [ RegionMap, AWSZoneStr, AZa ]
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  rSubnetPrivateAZb:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref rVPC
+      CidrBlock: !FindInMap [ mapCidrBlock, Ref: pEnvironment, SubnetPrvAZb]
+      AvailabilityZone: !FindInMap [ RegionMap, AWSZone, AZb]
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - "Prv"
+                - !FindInMap [ RegionMap, AWSZoneStr, AZb ]
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  rSubnetPrivateAZc:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref rVPC
+      CidrBlock: !FindInMap [ mapCidrBlock, Ref: pEnvironment, SubnetPrvAZc]
+      AvailabilityZone: !FindInMap [ RegionMap, AWSZone, AZc]
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - "Prv"
+                - !FindInMap [ RegionMap, AWSZoneStr, AZc ]
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  # save the VPC and its CIDR in the parameter store
+  rParamVpcId:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "VPC ID"
+      Type: "String"
+      Name: !Sub "/Vpc/${pEnvironment}/id"
+      Value: !Ref rVPC
+  rParamVpcCidr:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "VPC CIDR"
+      Type: "String"
+      Name: !Sub "/Vpc/${pEnvironment}/Cidr"
+      Value: 
+        Fn::GetAtt:
+          - rVPC
+          - CidrBlock
+  rParamPubSubnetAZa:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "Public Subnet in Zone A"
+      Type: "String"
+      Name: !Sub "/Vpc/${pEnvironment}/Pub/Subnet/AZa"
+      Value: !Ref rSubnetPublicAZa
+  rParamPubSubnetAZb:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "Public Subnet in Zone B"
+      Type: "String"
+      Name: !Sub "/Vpc/${pEnvironment}/Pub/Subnet/AZb"
+      Value: !Ref rSubnetPublicAZb
+  rParamPubSubnetAZc:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "Public Subnet in Zone C"
+      Type: "String"
+      Name: !Sub "/Vpc/${pEnvironment}/Pub/Subnet/AZc"
+      Value: !Ref rSubnetPublicAZc
+  rParamPrvSubnetAZa:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "Private Subnet in Zone A"
+      Type: "String"
+      Name: !Sub "/Vpc/${pEnvironment}/Prv/Subnet/AZa"
+      Value: !Ref rSubnetPrivateAZa
+  rParamPrvSubnetAZb:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "Private Subnet in Zone B"
+      Type: "String"
+      Name: !Sub "/Vpc/${pEnvironment}/Prv/Subnet/AZb"
+      Value: !Ref rSubnetPrivateAZb
+  rParamPrvSubnetAZc:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "Private Subnet in Zone C"
+      Type: "String"
+      Name: !Sub "/Vpc/${pEnvironment}/Prv/Subnet/AZc"
+      Value: !Ref rSubnetPrivateAZc
+
+  rRouteTablePublic:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref rVPC
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - RouteTablePublic
+        - Key: BusinessUnit
+          Value:
+            Ref: pBusinessUnit
+        - Key: Environment
+          Value:
+            Ref: pEnvironment
+  rRouteTablePrivate:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref rVPC
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - RouteTablePrivate
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  rRouteTableAssociationPublicAZa:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref rSubnetPublicAZa
+      RouteTableId: !Ref rRouteTablePublic
+  rRouteTableAssociationPublicAZb:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref rSubnetPublicAZb
+      RouteTableId: !Ref rRouteTablePublic
+  rRouteTableAssociationPublicAZc:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref rSubnetPublicAZc
+      RouteTableId: !Ref rRouteTablePublic
+  rRouteTableAssociationPrivateAZa:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref rSubnetPrivateAZa
+      RouteTableId: !Ref rRouteTablePrivate
+  rRouteTableAssociationPrivateAZb:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref rSubnetPrivateAZb
+      RouteTableId: !Ref rRouteTablePrivate
+  rRouteTableAssociationPrivateAZc:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref rSubnetPrivateAZc
+      RouteTableId: !Ref rRouteTablePrivate
+
+  rInternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - IGW
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  rInternetGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref rInternetGateway
+      VpcId: !Ref rVPC
+
+  rPublicInternetRoute:
+    Type: "AWS::EC2::Route"
+    DependsOn: rInternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref rRouteTablePublic
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref rInternetGateway
+
+  rNetworkAclPublic:
+    Type: "AWS::EC2::NetworkAcl"
+    Properties:
+      VpcId: !Ref rVPC
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - NetworkAclPublic
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+  rNetworkAclPrivate:
+    Type: "AWS::EC2::NetworkAcl"
+    Properties:
+      VpcId: !Ref rVPC
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - "-"
+              - - Ref: pBusinessUnit
+                - Ref: pEnvironment
+                - NetworkAclPrivate
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+Outputs:
+  oVpc:
+    Description: "VPC ID"
+    Value: !Ref rVPC
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-Vpc-${pEnvironment}"
+  oVpcCidr:
+    Description: "VPC CIDR"
+    Value:
+      Fn::GetAtt:
+        - rVPC
+        - CidrBlock
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-VpcCidr-${pEnvironment}"
+  oPublicSubnetAZa:
+    Description: "Public Subnet in Zone A"
+    Value: !Ref rSubnetPublicAZa
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-${pEnvironment}-PubAZa"
+  oPublicSubnetAZb:
+    Description: "Public Subnet in Zone B"
+    Value: !Ref rSubnetPublicAZb
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-${pEnvironment}-PubAZb"
+  oPublicSubnetAZc:
+    Description: "Public Subnet in Zone C"
+    Value: !Ref rSubnetPublicAZc
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-${pEnvironment}-PubAZc"
+  oPrivateSubnetAZa:
+    Description: "Private Subnet in Zone A"
+    Value: !Ref rSubnetPrivateAZa
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-${pEnvironment}-PrvAZa"
+  oPrivateSubnetAZb:
+    Description: "Private Subnet in Zone B"
+    Value: !Ref rSubnetPrivateAZb
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-${pEnvironment}-PrvAZb"
+  oPrivateSubnetAZc:
+    Description: "Private Subnet in Zone C"
+    Value: !Ref rSubnetPrivateAZc
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-${pEnvironment}-PrvAZc"
+
