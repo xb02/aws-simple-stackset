@@ -1,0 +1,55 @@
+---
+
+#
+# Filename    : StackSetExecRole.yml
+# Date        : 06 Mar 2019
+# Author      : Balaji Venkataraman (xbalaji@gmail.com)
+# Description : StackSet Execution Role, to be executed in the
+#               Target account which the Administator account operates on
+#
+# Ref: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-prereqs.html
+# https://raw.githubusercontent.com/aws-samples/arc325-multiple-accounts-workshop/master/templates/AWSCloudFormationStackSetExecutionRole.yml
+#
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Configure the AWSCloudFormationStackSetExecutionRole to enable use of your account as a target account in AWS CloudFormation StackSets.
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "Account Details"
+        Parameters:
+          - pAdministratorAccountId
+
+    ParameterLabels:
+      pAdministratorAccountId:
+        default: "Shared Services AccountID"
+
+
+Parameters:
+  pAdministratorAccountId:
+    Type: String
+    Description: AWS Account Id of the administrator account (the account in which StackSets will be created).
+    MaxLength: 12
+    MinLength: 12
+    Default: "579357099184"
+
+Resources:
+  rExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSCloudFormationStackSetExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref pAdministratorAccountId
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess

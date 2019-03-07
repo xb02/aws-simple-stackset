@@ -1,0 +1,40 @@
+---
+
+#
+# Filename    : StackSetAdminRole.yml
+# Date        : 06 Mar 2019
+# Author      : Balaji Venkataraman (xbalaji@gmail.com)
+# Description : StackSet Administration Role, to be executed in the 
+#               Administrator account
+#
+# Ref: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-prereqs.html
+# https://raw.githubusercontent.com/aws-samples/arc325-multiple-accounts-workshop/master/templates/AWSCloudFormationStackSetAdministrationRole.yml
+#
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Configure the AWSCloudFormationStackSetAdministrationRole to enable use of AWS CloudFormation StackSets.
+
+Resources:
+  AdministrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSCloudFormationStackSetAdministrationRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: AssumeRole-AWSCloudFormationStackSetExecutionRole
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource:
+                  - "arn:aws:iam::*:role/AWSCloudFormationStackSetExecutionRole"
