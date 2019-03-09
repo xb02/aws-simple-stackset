@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "pBusinessUnit",
+    "ParameterValue": "BU1"
+  },
+  {
+    "ParameterKey": "pEnvironment",
+    "ParameterValue": "Dev"
+  }
+]

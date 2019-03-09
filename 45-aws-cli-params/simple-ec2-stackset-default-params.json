@@ -1,0 +1,30 @@
+[
+  {
+    "ParameterKey": "pBusinessUnit",
+    "ParameterValue": "BU1"
+  },
+  {
+    "ParameterKey": "pEnvironment",
+    "ParameterValue": "Dev"
+  },
+  {
+    "ParameterKey": "pInstanceType",
+    "ParameterValue": "t2.small"
+  },
+  {
+    "ParameterKey": "pKeyName",
+    "ParameterValue": "xb_aws_pge_gen01"
+  },
+  {
+    "ParameterKey": "pOsType",
+    "ParameterValue": "AwsLinux"
+  },
+  {
+    "ParameterKey": "pPubSubnetAZa",
+    "ParameterValue": "/Vpc/Dev/Pub/Subnet/AZa"
+  },
+  {
+    "ParameterKey": "pVpcId",
+    "ParameterValue": "/Vpc/Dev/id"
+  }
+]
