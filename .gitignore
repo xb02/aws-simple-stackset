@@ -6,3 +6,4 @@ scripts/sts_assume_role/sasser_assume_role.py
 .*.sw*
 *bash.exe.stackdump
 *.iml
+45-aws-cli-params/codepipeline-xb02-master-params.json
