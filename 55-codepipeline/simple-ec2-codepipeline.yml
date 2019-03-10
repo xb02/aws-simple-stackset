@@ -34,39 +34,31 @@ Metadata:
       pOwner: {default: "Owner of this template"}
       pEnvironment: {default: "Environment" }
       pBusinessUnit: {default: "Business organization" }
-
 Parameters:
+  pGithubAccount:
+    Type: "String"
+    Description: "Enter the GitHub Account Name"
+  pRepo:
+    Type: "String"
+    Description: "Enter the GitHub Repo Name"
+  pBranch:
+    Type: "String"
+    Description: "Enter the Branch (dev, master, feature, etc) you wish to pull from the GitHub repo"
   pToken:
     Type: "String"
     Description: "Enter the GitHub Personal Access Token"
     NoEcho: true
-  pGithubAccount:
-    Type: "String"
-    Default: "xb02"
-    Description: "Enter the GitHub Account Name"
-  pRepo:
-    Type: "String"
-    Default: "aws-simple-stackset"
-    Description: "Enter the GitHub Repo Name"
-  pBranch:
-    Type: "String"
-    Default: "master"
-    Description: "Enter the Branch (dev, master, feature, etc) you wish to pull from the GitHub repo"
   pS3Bucketname:
     Type: "String"
-    Default: "xb-codepipeline-test01"
     Description: "S3 bucket name for code pipeline, don't use upper case characters"
   pTargetAccounts:
     Type: "String"
-    Default: "579357099184"
     Description: "Comma delimited list of target account numbers to create/update stack instance"
   pTargetRegion:
     Type: "String"
-    Default: "us-west-2"
     Description: "Target account region"
   pOwner:
     Type: "String"
-    Default: "xbalaji"
     Description: "Owner name"
   pEnvironment:
     Type: String
@@ -86,6 +78,7 @@ Parameters:
 Resources:
   rCodePipelineBucket:
     Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
     Properties:
       BucketName: !Ref pS3Bucketname
       Tags:
@@ -201,7 +194,7 @@ Resources:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
         PrivilegedMode: False
-        Image: aws/codebuild/nodejs:6.3.1
+        Image: aws/codebuild/ubuntu-base:14.04
       Source:
         Type: CODEPIPELINE
         BuildSpec: !Sub |
@@ -210,8 +203,6 @@ Resources:
             build:
               commands:
                 - echo Build started on `date`
-                - echo "Target accounts: ${pTargetAccounts}"
-                - echo "Target region: ${pTargetRegion}"
                 - ls -la
                 - find .
             post_build:
@@ -239,7 +230,7 @@ Resources:
       Stages:
         - Name: CloneSourceCode
           Actions:
-            - Name: SourceAction
+            - Name: GetFromGitHub
               ActionTypeId:
                 Category: Source
                 Owner: ThirdParty
@@ -250,14 +241,13 @@ Resources:
               Configuration: # GitHub Repo details provided in parameters above
                 Owner: !Ref pGithubAccount
                 Repo: !Ref pRepo
-                # Poll GitHub (every 30 seconds) for changes
-                PollForSourceChanges: True
+                PollForSourceChanges: False
                 Branch: !Ref pBranch
                 OAuthToken: !Ref pToken
               RunOrder: 1
         - Name: UpdateCloudFormationStackSet
           Actions:
-            - Name: CodeBuild
+            - Name: ExecuteAWSCliCommands
               InputArtifacts:
                 - Name: SourceClone
               ActionTypeId:
@@ -282,7 +272,7 @@ Resources:
         - JsonPath: "$.ref"
           MatchEquals: refs/heads/{Branch}
       TargetPipeline: !Ref rCodePipeline
-      TargetAction: SourceAction
+      TargetAction: GetFromGitHub
       Name: !Ref AWS::StackName
       TargetPipelineVersion: !GetAtt rCodePipeline.Version
       RegisterWithThirdParty: true
