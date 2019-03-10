@@ -1,0 +1,42 @@
+[
+  {
+    "ParameterKey": "pGithubAccount",
+    "ParameterValue": "copy from ~/.aws/github-codepipeline-params.txt"
+  },
+  {
+    "ParameterKey": "pRepo",
+    "ParameterValue": "copy from ~/.aws/github-codepipeline-params.txt"
+  },
+  {
+    "ParameterKey": "pBranch",
+    "ParameterValue": "copy from ~/.aws/github-codepipeline-params.txt"
+  },
+  {
+    "ParameterKey": "pToken",
+    "ParameterValue": "copy from ~/.aws/github-codepipeline-params.txt"
+  },
+  {
+    "ParameterKey": "pS3Bucketname",
+    "ParameterValue": "copy from ~/.aws/github-codepipeline-params.txt"
+  },
+  {
+    "ParameterKey": "pTargetAccounts",
+    "ParameterValue": "copy from ~/.aws/github-codepipeline-params.txt"
+  },
+  {
+    "ParameterKey": "pTargetRegion",
+    "ParameterValue": "us-west-2"
+  },
+  {
+    "ParameterKey": "pOwner",
+    "ParameterValue": "xbalaji"
+  },
+  {
+    "ParameterKey": "pBusinessUnit",
+    "ParameterValue": "BU1"
+  },
+  {
+    "ParameterKey": "pEnvironment",
+    "ParameterValue": "Dev"
+  }
+]
