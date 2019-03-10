@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "pS3Bucketname",
+    "ParameterValue": "xb-innovation-generic-codepipeline-bucket"
+  },
+  {
+    "ParameterKey": "pBusinessUnit",
+    "ParameterValue": "BU1"
+  },
+  {
+    "ParameterKey": "pEnvironment",
+    "ParameterValue": "Dev"
+  },
+  {
+    "ParameterKey": "pOwner",
+    "ParameterValue": "xbalaji"
+  }
+]
