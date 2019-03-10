@@ -1,0 +1,289 @@
+---
+
+# 
+# Filename    : aws-simple-stackset/55-codepipeline/simple-ec2-codepipeline.yml
+# Date        : 09 Mar 2019
+# Author      : Balaji Venkataraman (xbalaji@gmail.com)
+# Description : codepipeline to create/update cloudformation template when
+#               source code repo is updated
+#
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS CodePipeline to Create/Update stack using stackset
+
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: {default: "Github configuration"}
+        Parameters: [pGithubAccount, pRepo, pBranch, pToken]
+      - Label: {default: "S3 bucket name"}
+        Parameters: [pS3Bucketname]
+      - Label: {default: "Target Accounts information"}
+        Parameters: [pTargetAccounts, pTargetRegion]
+      - Label: {default: "General tags"}
+        Parameters: [pOwner, pEnvironment, pBusinessUnit]
+    ParameterLabels:
+      pGithubAccount: {default: "Github Account"}
+      pRepo: {default: "Github Source Repository"}
+      pBranch: {default: "Repo Branch"}
+      pToken: {default: "GitHub Personal Access Token"}
+      pS3Bucketname: {default: "S3 bucketname for codepipeline artifacts"}
+      pTargetAccounts: {default: "Account numbers to deploy stack instance"}
+      pTargetRegion: {default: "Target account regions"}
+      pOwner: {default: "Owner of this template"}
+      pEnvironment: {default: "Environment" }
+      pBusinessUnit: {default: "Business organization" }
+
+Parameters:
+  pToken:
+    Type: "String"
+    Description: "Enter the GitHub Personal Access Token"
+    NoEcho: true
+  pGithubAccount:
+    Type: "String"
+    Default: "xb02"
+    Description: "Enter the GitHub Account Name"
+  pRepo:
+    Type: "String"
+    Default: "aws-simple-stackset"
+    Description: "Enter the GitHub Repo Name"
+  pBranch:
+    Type: "String"
+    Default: "master"
+    Description: "Enter the Branch (dev, master, feature, etc) you wish to pull from the GitHub repo"
+  pS3Bucketname:
+    Type: "String"
+    Default: "xb-codepipeline-test01"
+    Description: "S3 bucket name for code pipeline, don't use upper case characters"
+  pTargetAccounts:
+    Type: "String"
+    Default: "579357099184"
+    Description: "Comma delimited list of target account numbers to create/update stack instance"
+  pTargetRegion:
+    Type: "String"
+    Default: "us-west-2"
+    Description: "Target account region"
+  pOwner:
+    Type: "String"
+    Default: "xbalaji"
+    Description: "Owner name"
+  pEnvironment:
+    Type: String
+    Default: Dev
+    AllowedValues:
+      - Dev
+      - Test
+      - Prod
+      - Tools
+  pBusinessUnit:
+    Type: String
+    Default: BU1
+    AllowedValues:
+      - BU1
+      - BU2
+
+Resources:
+  rCodePipelineBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Ref pS3Bucketname
+      Tags:
+        - Key: Owner
+          Value: !Ref pOwner
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+  rCodePipelinePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "${AWS::StackName}-PIPELINE-POLICY-${pBusinessUnit}-${pEnvironment}"
+      Description: CodePipeline Managed Policy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - cloudformation:*
+              - cloudwatch:*
+              - ec2:*
+              - s3:*
+              - ssm:*
+              - rds:*
+              - ecs:*
+              - lambda:*
+              - events:*
+              - sns:*
+              - ssm:*
+              - support:*
+              - logs:describe*
+              - logs:get*
+              - logs:create*
+              - logs:filter*
+              - logs:put*
+              - config:Describe*
+              - config:Get*
+              - config:List*
+              - kms:Encrypt
+              - kms:Decrypt
+              - codebuild:*
+            Resource: "*"
+  rCodeBuildProjectPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "${AWS::StackName}-BUILDPROJECT-POLICY-${pBusinessUnit}-${pEnvironment}"
+      Description: CodePipeline Managed Policy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - cloudformation:*
+              - cloudwatch:*
+              - ec2:*
+              - s3:*
+              - ssm:*
+              - rds:*
+              - ecs:*
+              - lambda:*
+              - events:*
+              - sns:*
+              - ssm:*
+              - support:*
+              - logs:describe*
+              - logs:get*
+              - logs:create*
+              - logs:filter*
+              - logs:put*
+              - config:Describe*
+              - config:Get*
+              - config:List*
+              - kms:Encrypt
+              - kms:Decrypt
+            Resource: "*"
+
+  rCodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-PIPELINE-ROLE-${pBusinessUnit}-${pEnvironment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {Service: [codepipeline.amazonaws.com]}
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - !Ref rCodePipelinePolicy
+
+  rCodeBuildProjectRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-BUILDPROJECT-ROLE-${pBusinessUnit}-${pEnvironment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {Service: [codebuild.amazonaws.com]}
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - !Ref rCodeBuildProjectPolicy
+
+  rCodeBuildProject:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !Sub "${AWS::StackName}-BUILDPROJECT-${pBusinessUnit}-${pEnvironment}"
+      ServiceRole: !Ref rCodeBuildProjectRole
+      BadgeEnabled: False
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        PrivilegedMode: False
+        Image: aws/codebuild/nodejs:6.3.1
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            build:
+              commands:
+                - echo Build started on `date`
+                - echo "Target accounts: ${pTargetAccounts}"
+                - echo "Target region: ${pTargetRegion}"
+                - ls -la
+                - find .
+            post_build:
+              commands:
+                - echo Build completed on `date`
+      TimeoutInMinutes: 10
+      Cache:
+        Type: NO_CACHE
+      Tags:
+        - Key: Owner
+          Value: !Ref pOwner
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+
+  rCodePipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: !Sub "${AWS::StackName}-PIPELINE-${pBusinessUnit}-${pEnvironment}"
+      RoleArn: !GetAtt rCodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref rCodePipelineBucket
+      Stages:
+        - Name: CloneSourceCode
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: "1"
+                Provider: GitHub
+              OutputArtifacts:
+                - Name: SourceClone
+              Configuration: # GitHub Repo details provided in parameters above
+                Owner: !Ref pGithubAccount
+                Repo: !Ref pRepo
+                # Poll GitHub (every 30 seconds) for changes
+                PollForSourceChanges: True
+                Branch: !Ref pBranch
+                OAuthToken: !Ref pToken
+              RunOrder: 1
+        - Name: UpdateCloudFormationStackSet
+          Actions:
+            - Name: CodeBuild
+              InputArtifacts:
+                - Name: SourceClone
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: "1"
+                Provider: CodeBuild
+              OutputArtifacts:
+                - Name: CloudFormationOutput
+              Configuration:
+                ProjectName:
+                  Ref: rCodeBuildProject
+              RunOrder: 1
+
+  rCodePipelineGithubWebhook:
+    Type: AWS::CodePipeline::Webhook
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: !Ref pToken
+      Filters:
+        - JsonPath: "$.ref"
+          MatchEquals: refs/heads/{Branch}
+      TargetPipeline: !Ref rCodePipeline
+      TargetAction: SourceAction
+      Name: !Ref AWS::StackName
+      TargetPipelineVersion: !GetAtt rCodePipeline.Version
+      RegisterWithThirdParty: true
+
