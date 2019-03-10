@@ -17,7 +17,7 @@ Metadata:
     ParameterGroups:
       - Label: {default: "Github configuration"}
         Parameters: [pGithubAccount, pRepo, pBranch, pToken]
-      - Label: {default: "S3 bucket name"}
+      - Label: {default: "Exisiting S3 bucket name"}
         Parameters: [pS3Bucketname]
       - Label: {default: "Target Accounts information"}
         Parameters: [pTargetAccounts, pTargetRegion]
@@ -50,7 +50,7 @@ Parameters:
     NoEcho: true
   pS3Bucketname:
     Type: "String"
-    Description: "S3 bucket name for code pipeline, don't use upper case characters"
+    Description: "S3 bucket name to use with code pipeline, exisitng bucket name"
   pTargetAccounts:
     Type: "String"
     Description: "Comma delimited list of target account numbers to create/update stack instance"
@@ -76,18 +76,6 @@ Parameters:
       - BU2
 
 Resources:
-  rCodePipelineBucket:
-    Type: "AWS::S3::Bucket"
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: !Ref pS3Bucketname
-      Tags:
-        - Key: Owner
-          Value: !Ref pOwner
-        - Key: BusinessUnit
-          Value: !Ref pBusinessUnit
-        - Key: Environment
-          Value: !Ref pEnvironment
   rCodePipelinePolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -226,7 +214,7 @@ Resources:
       RoleArn: !GetAtt rCodePipelineRole.Arn
       ArtifactStore:
         Type: S3
-        Location: !Ref rCodePipelineBucket
+        Location: !Ref pS3Bucketname
       Stages:
         - Name: CloneSourceCode
           Actions:
