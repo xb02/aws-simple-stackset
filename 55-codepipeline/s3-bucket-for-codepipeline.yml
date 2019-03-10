@@ -1,0 +1,80 @@
+---
+
+# 
+# Filename    : aws-simple-stackset/55-codepipeline/s3-bucket-for-codepipeline.yml
+# Date        : 10 Mar 2019
+# Author      : Balaji Venkataraman (xbalaji@gmail.com)
+# Description : create S3 bucket to be used with codepipeline artifacts, has to
+#               be an independent template to avoid failing due to duplicate name
+#               source code repo is updated
+#
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS CodePipeline to Create S3 bucket for codepipeline
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: {default: "S3 bucket name"}
+        Parameters: [pS3Bucketname]
+      - Label: {default: "General tags"}
+        Parameters: [pOwner, pEnvironment, pBusinessUnit]
+    ParameterLabels:
+      pS3Bucketname: {default: "S3 bucketname for codepipeline artifacts"}
+      pOwner: {default: "Owner of this template"}
+      pEnvironment: {default: "Environment" }
+      pBusinessUnit: {default: "Business organization" }
+Parameters:
+  pS3Bucketname:
+    Type: "String"
+    Description: "S3 bucket name for code pipeline, don't use upper case characters"
+  pOwner:
+    Type: "String"
+    Description: "Owner name"
+  pEnvironment:
+    Type: String
+    Default: Dev
+    AllowedValues:
+      - Dev
+      - Test
+      - Prod
+      - Tools
+  pBusinessUnit:
+    Type: String
+    Default: BU1
+    AllowedValues:
+      - BU1
+      - BU2
+Resources:
+  rCodePipelineBucket:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref pS3Bucketname
+      AccessControl: Private
+      Tags:
+        - Key: Owner
+          Value: !Ref pOwner
+        - Key: BusinessUnit
+          Value: !Ref pBusinessUnit
+        - Key: Environment
+          Value: !Ref pEnvironment
+Outputs:
+  oCodePipelineBucket:
+    Description: "CodePipelineBucket Ref"
+    Value: !Ref rCodePipelineBucket
+  oCodePipelineBucketName:
+    Description: "CodePipelineBucket Name"
+    Value: !Ref pS3Bucketname
+  oCodePipelineBucketArn:
+    Description: "CodePipelineBucket Arn"
+    Value: !GetAtt rCodePipelineBucket.Arn
+  oCodePipelineBucketDomainName:
+    Description: "CodePipelineBucket DomainName"
+    Value: !GetAtt rCodePipelineBucket.DomainName
+  oCodePipelineBucketRegionalDomainName:
+    Description: "CodePipelineBucket RegionalDomainName"
+    Value: !GetAtt rCodePipelineBucket.RegionalDomainName
+  oCodePipelineBucketWebsiteURL:
+    Description: "CodePipelineBucket WebsiteURL"
+    Value: !GetAtt rCodePipelineBucket.WebsiteURL
