@@ -21,7 +21,7 @@ aws --profile innovation                                \
     --stack-set-name create-simple-single-ec2-stackset  \
     --regions  "us-west-2"                              \
     --accounts "579357099184"                           \
-    --parameter-overrides "ParameterKey=pMyIp,ParameterValue=172.9.238.213/32,ParameterKey=pPubSubnetAZa,ParameterValue=/Vpc/Dev/Pub/Subnet/AZb"
+    --parameter-overrides "ParameterKey=pMyIp,ParameterValue=172.9.238.213/32,ParameterKey=pPubSubnetAZ,ParameterValue=/Vpc/Dev/Pub/Subnet/AZa"
 
 #    --parameter-overrides file://../45-aws-cli-params/simple-ec2-params.json
 
