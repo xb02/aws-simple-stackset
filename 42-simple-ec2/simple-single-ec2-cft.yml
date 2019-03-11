@@ -12,7 +12,7 @@
 #
 
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Simple EC2 instances on all Subnets of a VPC"
+Description: "Simple one EC2 instance on a publicly reachable subnet"
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -22,7 +22,7 @@ Metadata:
       - Label: {default: "Instance configuration"}
         Parameters: [pInstanceType, pOsType, pKeyName]
       - Label: {default: "Network related configuration"}
-        Parameters: [pVpcId, pPubSubnetAZa]
+        Parameters: [pVpcId, pPubSubnetAZ]
     ParameterLabels:
       pMyIp: {default: "IP address CIDR"}
       pEnvironment: {default: "Environment" }
@@ -31,7 +31,7 @@ Metadata:
       pOsType: {default: "Operating system" }
       pKeyName: {default: "Key pair" }
       pVpcId: {default: "VPC to use" }
-      pPubSubnetAZa: {default: "Public  Subnet to use in zone A" }
+      pPubSubnetAZ: {default: "Public Subnet to use in Availability Zone" }
 
 Parameters:
   pMyIp:
@@ -81,9 +81,9 @@ Parameters:
     Description: "VPC for this instance"
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/Vpc/Dev/id"
-  pPubSubnetAZa:
+  pPubSubnetAZ:
     Type: "AWS::SSM::Parameter::Value<String>"
-    Description: "Public Zone-A subnet for this instance"
+    Description: "Public subnet for this instance, in the availablity zone"
     Default: "/Vpc/Dev/Pub/Subnet/AZa"
 
 Mappings:
@@ -130,8 +130,7 @@ Resources:
       ImageId: !FindInMap [OsToAMIID, !Ref pOsType, "id" ]
       InstanceType: !Ref pInstanceType
       KeyName: !Ref pKeyName
-      SubnetId: !Join [ "", [ "", !Ref pPubSubnetAZa ] ]
-      #SubnetId: "{{resolve:ssm:/Vpc/${pEnvironment}/Pub/Subnet/AZa}}"
+      SubnetId: !Join [ "", [ "", !Ref pPubSubnetAZ ] ]
       SecurityGroupIds: [ !GetAtt [ rSshHttpHttpsSG, GroupId ] ]
       UserData:
         "Fn::Base64": !Sub |
