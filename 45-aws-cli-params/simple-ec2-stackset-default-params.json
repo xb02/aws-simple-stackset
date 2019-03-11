@@ -20,7 +20,7 @@
     "ParameterValue": "AwsLinux"
   },
   {
-    "ParameterKey": "pPubSubnetAZa",
+    "ParameterKey": "pPubSubnetAZ",
     "ParameterValue": "/Vpc/Dev/Pub/Subnet/AZa"
   },
   {
