@@ -136,7 +136,7 @@ Resources:
       KeyName: !Ref pKeyName
       SubnetId: !Join [ "", [ "", !Ref pPubSubnetAZ ] ]
       SecurityGroupIds: [ !GetAtt [ rSshHttpHttpsSG, GroupId ] ]
-      UserData:
+      UserData: |
           #!/bin/bash -x
           yum update -y
           mkdir -p /tmp/wsgi
