@@ -13,10 +13,22 @@
 # aws cli reference example
 # https://aws.amazon.com/blogs/devops/passing-parameters-to-cloudformation-stacks-with-the-aws-cli-and-powershell/
 
+StackName="xb-pipeline-test-01"
 
-aws --profile innovation cloudformation create-stack --stack-name "xb-pipeline-test01"  \
-    --capabilities CAPABILITY_NAMED_IAM                                                 \
-    --tags file://../45-aws-cli-params/stackset-stack-generic-tags.json                 \
-    --template-body file://../55-codepipeline/simple-ec2-codepipeline.yml               \
+StackStatus=$(aws --profile innovation cloudformation describe-stacks --stack-name ${StackName} 2>/dev/null | jq '.Stacks[].StackStatus')
+echo ${StackStatus}
+
+if [ -z $StackStatus ]
+then
+  AwsCliCmd='create'
+else
+  AwsCliCmd='update'
+fi
+
+
+aws --profile innovation cloudformation ${AwsCliCmd}                            \
+    --stack --stack-name ${StackName}  --capabilities CAPABILITY_NAMED_IAM      \
+    --tags file://../45-aws-cli-params/stackset-stack-generic-tags.json         \
+    --template-body file://../55-codepipeline/simple-ec2-codepipeline.yml       \
     --parameters file://../45-aws-cli-params/codepipeline-xb02-master-params.json
 

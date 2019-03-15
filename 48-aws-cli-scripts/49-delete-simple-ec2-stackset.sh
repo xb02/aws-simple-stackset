@@ -13,5 +13,6 @@
 # aws cli reference example
 # https://docs.aws.amazon.com/cli/latest/reference/cloudformation/delete-stack-set.html
 
-aws --profile innovation cloudformation delete-stack-set --stack-set-name create-simple-single-ec2-stackset
+StackSetName="create-simple-single-ec2-stackset"
+aws --profile innovation cloudformation delete-stack-set --stack-set-name ${StackSetName}
 

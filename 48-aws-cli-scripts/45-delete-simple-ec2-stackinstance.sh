@@ -16,9 +16,10 @@
 # add this additional option to generate a skeleton
 #    --generate-cli-skeleton
 
+StackSetName="create-simple-single-ec2-stackset"
 aws --profile innovation                                \
     cloudformation delete-stack-instances               \
-    --stack-set-name create-simple-single-ec2-stackset  \
+    --stack-set-name ${StackSetName}                    \
     --no-retain-stacks                                  \
     --regions  "us-west-2"                              \
     --accounts "579357099184"                           \

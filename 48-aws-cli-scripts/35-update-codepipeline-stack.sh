@@ -13,11 +13,12 @@
 # aws cli reference example
 # https://docs.aws.amazon.com/cli/latest/reference/cloudformation/update-stack.html
 
+StackName="xb-pipeline-test-01"
 
-aws --profile innovation cloudformation update-stack --stack-name "xb-pipeline-test01"  \
-    --capabilities CAPABILITY_NAMED_IAM                                                 \
-    --template-body file://../55-codepipeline/simple-ec2-codepipeline.yml               \
-    --tags file://../45-aws-cli-params/stackset-stack-generic-tags.json                 \
+aws --profile innovation cloudformation update-stack --stack-name ${StackName}    \
+    --capabilities CAPABILITY_NAMED_IAM                                           \
+    --template-body file://../55-codepipeline/simple-ec2-codepipeline.yml         \
+    --tags file://../45-aws-cli-params/stackset-stack-generic-tags.json           \
     --parameters file://../45-aws-cli-params/codepipeline-xb02-master-params.json
 
 #    --parameters file://../45-aws-cli-params/codepipeline-xb02-update-params.json

@@ -16,20 +16,37 @@
 # https://docs.aws.amazon.com/cli/latest/reference/cloudformation/update-stack-set.html
 
 
-stack_status=$(aws  --profile innovation cloudformation describe-stack-set  --stack-set-name create-simple-single-ec2-stackset 2>/dev/null | jq '.StackSet.Status')
-echo ${stack_status}
+StackSetName="create-simple-single-ec2-stackset"
+StackStatus=$(aws  --profile innovation cloudformation describe-stack-set  --stack-set-name ${StackSetName} 2>/dev/null | jq '.StackSet.Status')
+echo ${StackStatus}
 
-if [ -z $stack_status ]
+if [ -z $StackStatus ]
 then
-  aws_cli_cmd=create
+  AwsCliCmd=create
 else
-  aws_cli_cmd=update
+  AwsCliCmd=update
 fi
-echo ${aws_cli_cmd}
+echo ${AwsCliCmd}
 
-aws --profile innovation cloudformation "${aws_cli_cmd}-stack-set"    \
-    --stack-set-name create-simple-single-ec2-stackset                \
-    --description "single ec2 instance creation stackset"             \
-    --template-body file://../42-simple-ec2/simple-single-ec2-cft.yml \
-    --tags file://../45-aws-cli-params/simple-ec2-instance-tags.json  \
-    --parameters file://../45-aws-cli-params/simple-ec2-stackset-default-params.json
+OperId=$(aws --profile innovation cloudformation "${AwsCliCmd}-stack-set"       \
+             --stack-set-name ${StackSetName}                                   \
+             --description "single ec2 instance creation stackset"              \
+             --capabilities CAPABILITY_NAMED_IAM                                \
+             --tags file://../45-aws-cli-params/simple-ec2-instance-tags.json   \
+             --template-body file://../42-simple-ec2/simple-single-ec2-cft.yml                      \
+             --parameters file://../45-aws-cli-params/simple-ec2-stackset-default-params.json       \
+             --operation-preferences file://../45-aws-cli-params/simple-ec2-stackset-oper-pref.json \
+             | jq '.OperationId' | sed -e 's,\",,g')
+
+echo "Operation id: ${OperId}"
+while true
+do
+  sleep 5
+  if [ -z $OperId ]; then break; fi
+
+  AwsCfnDesStkSetOpr="aws cloudformation describe-stack-set-operation --stack-set-name ${StackSetName}"
+  OperStatus=$(${AwsCfnDesStkSetOpr} --operation-id ${OperId} 2>/dev/null | jq '.StackSetOperation.Status')
+  if [ -z $OperStatus ]; then break; fi
+
+  if [ ${OperStatus} != '"RUNNING"' ]; then break; fi
+done

@@ -16,9 +16,10 @@
 # add this additional option to generate a skeleton
 #    --generate-cli-skeleton
 
+StackSetName="create-simple-single-ec2-stackset"
 aws --profile innovation                                \
     cloudformation update-stack-instances               \
-    --stack-set-name create-simple-single-ec2-stackset  \
+    --stack-set-name ${StackSetName}                    \
     --regions  "us-west-2"                              \
     --accounts "579357099184"                           \
     --parameter-overrides "ParameterKey=pMyIp,ParameterValue=172.9.238.213/32,ParameterKey=pPubSubnetAZ,ParameterValue=/Vpc/Dev/Pub/Subnet/AZa"

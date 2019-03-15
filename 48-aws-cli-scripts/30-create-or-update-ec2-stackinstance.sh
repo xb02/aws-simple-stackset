@@ -19,17 +19,17 @@ StackSetName="create-simple-single-ec2-stackset"
 for ix in $(cat ../45-aws-cli-params/simple-ec2-stack-accounts.txt)
 do
 
-  IFS=',' read -r -a acc_reg_array <<< "${ix}"
-  AccNum=${acc_reg_array[0]}
-  RegName=${acc_reg_array[1]}
+  IFS=',' read -r -a AccRegArray <<< "${ix}"
+  AccNum=${AccRegArray[0]}
+  RegName=${AccRegArray[1]}
   echo "Account number: ${AccNum}"
   echo "Account region: ${RegName}"
 
   CmdLine="aws --profile innovation cloudformation describe-stack-instance --stack-set-name ${StackSetName}"
-  instance_status=$(${CmdLine} --stack-instance-account ${AccNum} --stack-instance-region ${RegName} 2>/dev/null | jq '.StackInstance.Status')
-  echo "instance status: ${instance_status}"
+  InstanceStatus=$(${CmdLine} --stack-instance-account ${AccNum} --stack-instance-region ${RegName} 2>/dev/null | jq '.StackInstance.Status')
+  echo "instance status: ${InstanceStatus}"
 
-  if [ -z $instance_status ]
+  if [ -z $InstanceStatus ]
   then
     AwsCliCmd=create
   else
@@ -46,7 +46,8 @@ do
     sleep 5
     if [ -z $OperId ]; then break; fi
 
-    OperStatus=$(aws cloudformation describe-stack-set-operation --stack-set-name ${StackSetName} --operation-id ${OperId} 2>/dev/null | jq '.StackSetOperation.Status')
+    AwsCfnDesStkSetOpr="aws cloudformation describe-stack-set-operation --stack-set-name ${StackSetName}"
+    OperStatus=$(${AwsCfnDesStkSetOpr} --operation-id ${OperId} 2>/dev/null | jq '.StackSetOperation.Status')
     if [ -z $OperStatus ]; then break; fi
 
     if [ ${OperStatus} != '"RUNNING"' ]; then break; fi

@@ -13,5 +13,7 @@
 # aws cli reference example
 # https://docs.aws.amazon.com/cli/latest/reference/cloudformation/delete-stack.html
 
-aws --profile innovation cloudformation delete-stack --stack-name "xb-pipeline-test01"
+StackName="xb-pipeline-test-01"
+
+aws --profile innovation cloudformation delete-stack --stack-name ${StackName}
 

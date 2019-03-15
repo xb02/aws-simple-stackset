@@ -13,9 +13,9 @@
 # aws cli reference example
 # https://docs.aws.amazon.com/cli/latest/reference/cloudformation/update-stack-set.html
 
-
+StackSetName="create-simple-single-ec2-stackset"
 aws --profile innovation cloudformation update-stack-set              \
-    --stack-set-name create-simple-single-ec2-stackset                \
+    --stack-set-name ${StackSetName}                                  \
     --description "single ec2 instance creation stackset"             \
     --template-body file://../42-simple-ec2/simple-single-ec2-cft.yml \
     --tags file://../45-aws-cli-params/simple-ec2-instance-tags.json  \
