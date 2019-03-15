@@ -20,14 +20,6 @@
     "ParameterValue": "copy from ~/.aws/github-codepipeline-params.txt"
   },
   {
-    "ParameterKey": "pTargetAccounts",
-    "ParameterValue": "copy from ~/.aws/github-codepipeline-params.txt"
-  },
-  {
-    "ParameterKey": "pTargetRegion",
-    "ParameterValue": "us-west-2"
-  },
-  {
     "ParameterKey": "pOwner",
     "ParameterValue": "xbalaji"
   },
