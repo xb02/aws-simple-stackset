@@ -79,7 +79,7 @@ Parameters:
     Default: "xb_aws_pge_gen01"
   pVpcId:
     Description: "VPC for this instance"
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: "AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>"
     Default: "/Vpc/Dev/id"
   pPubSubnetAZ:
     Type: "AWS::SSM::Parameter::Value<String>"
@@ -101,20 +101,20 @@ Resources:
       #VpcId: "{{resolve:ssm:/Vpc/${pEnvironment}/id}}"
       SecurityGroupIngress:
         - IpProtocol: "tcp"
-          FromPort: "22"
-          ToPort: "22"
+          FromPort: 22
+          ToPort: 22
           CidrIp: !Ref pMyIp
         - IpProtocol: "tcp"
-          FromPort: "80"
-          ToPort: "80"
+          FromPort: 80
+          ToPort: 80
           CidrIp: !Ref pMyIp
         - IpProtocol: "tcp"
-          FromPort: "443"
-          ToPort: "443"
+          FromPort: 443
+          ToPort: 443
           CidrIp: !Ref pMyIp
         - IpProtocol: "tcp"
-          FromPort: "8080"
-          ToPort: "8080"
+          FromPort: 8080
+          ToPort: 8080
           CidrIp: !Ref pMyIp
       Tags:
         - Key: Name
@@ -137,7 +137,6 @@ Resources:
       SubnetId: !Join [ "", [ "", !Ref pPubSubnetAZ ] ]
       SecurityGroupIds: [ !GetAtt [ rSshHttpHttpsSG, GroupId ] ]
       UserData:
-        "Fn::Base64": !Sub |
           #!/bin/bash -x
           yum update -y
           mkdir -p /tmp/wsgi

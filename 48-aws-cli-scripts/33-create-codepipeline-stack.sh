@@ -26,8 +26,8 @@ else
 fi
 
 
-aws --profile innovation cloudformation ${AwsCliCmd}                            \
-    --stack --stack-name ${StackName}  --capabilities CAPABILITY_NAMED_IAM      \
+aws --profile innovation cloudformation ${AwsCliCmd}-stack                      \
+    --stack-name ${StackName}  --capabilities CAPABILITY_NAMED_IAM              \
     --tags file://../45-aws-cli-params/stackset-stack-generic-tags.json         \
     --template-body file://../55-codepipeline/simple-ec2-codepipeline.yml       \
     --parameters file://../45-aws-cli-params/codepipeline-xb02-master-params.json

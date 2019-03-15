@@ -1,0 +1,5 @@
+{
+  "RegionOrder": ["us-west-2"],
+  "FailureToleranceCount": 100,
+  "MaxConcurrentCount": 100
+}

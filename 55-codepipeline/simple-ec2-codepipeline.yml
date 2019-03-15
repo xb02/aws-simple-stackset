@@ -19,8 +19,6 @@ Metadata:
         Parameters: [pGithubAccount, pRepo, pBranch, pToken]
       - Label: {default: "Exisiting S3 bucket name"}
         Parameters: [pS3Bucketname]
-      - Label: {default: "Target Accounts information"}
-        Parameters: [pTargetAccounts, pTargetRegion]
       - Label: {default: "General tags"}
         Parameters: [pOwner, pEnvironment, pBusinessUnit]
     ParameterLabels:
@@ -29,8 +27,6 @@ Metadata:
       pBranch: {default: "Repo Branch"}
       pToken: {default: "GitHub Personal Access Token"}
       pS3Bucketname: {default: "S3 bucketname for codepipeline artifacts"}
-      pTargetAccounts: {default: "Account numbers to deploy stack instance"}
-      pTargetRegion: {default: "Target account regions"}
       pOwner: {default: "Owner of this template"}
       pEnvironment: {default: "Environment" }
       pBusinessUnit: {default: "Business organization" }
@@ -51,12 +47,6 @@ Parameters:
   pS3Bucketname:
     Type: "String"
     Description: "S3 bucket name to use with code pipeline, exisitng bucket name"
-  pTargetAccounts:
-    Type: "String"
-    Description: "Comma delimited list of target account numbers to create/update stack instance"
-  pTargetRegion:
-    Type: "String"
-    Description: "Target account region"
   pOwner:
     Type: "String"
     Description: "Owner name"
@@ -187,7 +177,7 @@ Resources:
       Source:
         Type: CODEPIPELINE
         # https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html
-        BuildSpec: !Sub |
+        BuildSpec: |
           version: 0.2
           phases:
             install:
@@ -200,12 +190,10 @@ Resources:
                 - echo Build commands started on `date`
                 - ls -la
                 - find .
-                - aws configure set region "us-west-2"
-                - aws configure set output "json"      
                 - aws configure --profile innovation set region "us-west-2"
-                - aws configure --profile innovation set output "json"
-                - (cd 48-aws-cli-scripts; /bin/bash ./28-create-or-update-ec2-stackset.sh)
-                - (cd 48-aws-cli-scripts; /bin/bash ./30-create-or-update-ec2-stackinstance.sh)
+                - aws configure --profile innovation set output "json"      
+                - (cd 48-aws-cli-scripts; /bin/bash -x ./28-create-or-update-ec2-stackset.sh)
+                - (cd 48-aws-cli-scripts; /bin/bash -x ./30-create-or-update-ec2-stackinstance.sh)
             post_build:
               commands:
                 - echo Build completed on `date`
