@@ -38,10 +38,10 @@ do
   fi
     
   OperId=$(aws --profile innovation cloudformation "${AwsCliCmd}-stack-instances"       \
-               --stack-set-name ${StackSetName} ${OperPrefsWithFile}                    \
+               --stack-set-name ${StackSetName}                                         \
                --accounts "${AccNum}" --regions  "${RegName}"                           \
                --parameter-overrides file://../45-aws-cli-params/simple-ec2-params.json \
-               2 > /dev/null | jq '.OperationId')
+               ${OperPrefsWithFile} 2>/dev/null | jq '.OperationId' | sed -e 's,\",,g' )
 
   echo "Operation id: ${OperId}"
   while true

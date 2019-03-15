@@ -33,11 +33,10 @@ OperId=$(aws --profile innovation cloudformation "${AwsCliCmd}-stack-set"     \
              --stack-set-name ${StackSetName}                                 \
              --description "single ec2 instance creation stackset"            \
              --capabilities CAPABILITY_NAMED_IAM                              \
-             ${OperPrefsWithFile}                                             \
              --tags file://../45-aws-cli-params/simple-ec2-instance-tags.json \
              --template-body file://../42-simple-ec2/simple-single-ec2-cft.yml                      \
              --parameters file://../45-aws-cli-params/simple-ec2-stackset-default-params.json       \
-             | jq '.OperationId' | sed -e 's,\",,g')
+             ${OperPrefsWithFile} 2>/dev/null | jq '.OperationId' | sed -e 's,\",,g')
 
 echo "Operation id: ${OperId}"
 while true
