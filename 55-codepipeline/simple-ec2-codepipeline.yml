@@ -190,6 +190,8 @@ Resources:
                 - echo Build commands started on `date`
                 - ls -la
                 - find .
+                - aws configure set region "us-west-2"
+                - aws configure set output "json"      
                 - aws configure --profile innovation set region "us-west-2"
                 - aws configure --profile innovation set output "json"      
                 - (cd 48-aws-cli-scripts; /bin/bash -x ./28-create-or-update-ec2-stackset.sh)

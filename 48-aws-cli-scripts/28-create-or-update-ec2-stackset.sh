@@ -25,17 +25,18 @@ then
   AwsCliCmd=create
 else
   AwsCliCmd=update
+  OperPrefsWithFile="--operation-preferences file://../45-aws-cli-params/simple-ec2-stackset-oper-pref.json"
 fi
 echo ${AwsCliCmd}
 
-OperId=$(aws --profile innovation cloudformation "${AwsCliCmd}-stack-set"       \
-             --stack-set-name ${StackSetName}                                   \
-             --description "single ec2 instance creation stackset"              \
-             --capabilities CAPABILITY_NAMED_IAM                                \
-             --tags file://../45-aws-cli-params/simple-ec2-instance-tags.json   \
+OperId=$(aws --profile innovation cloudformation "${AwsCliCmd}-stack-set"     \
+             --stack-set-name ${StackSetName}                                 \
+             --description "single ec2 instance creation stackset"            \
+             --capabilities CAPABILITY_NAMED_IAM                              \
+             ${OperPrefsWithFile}                                             \
+             --tags file://../45-aws-cli-params/simple-ec2-instance-tags.json \
              --template-body file://../42-simple-ec2/simple-single-ec2-cft.yml                      \
              --parameters file://../45-aws-cli-params/simple-ec2-stackset-default-params.json       \
-             --operation-preferences file://../45-aws-cli-params/simple-ec2-stackset-oper-pref.json \
              | jq '.OperationId' | sed -e 's,\",,g')
 
 echo "Operation id: ${OperId}"

@@ -16,6 +16,7 @@
 
 
 StackSetName="create-simple-single-ec2-stackset"
+OperPrefsWithFile="--operation-preferences file://../45-aws-cli-params/simple-ec2-stackset-oper-pref.json"
 for ix in $(cat ../45-aws-cli-params/simple-ec2-stack-accounts.txt)
 do
 
@@ -37,8 +38,10 @@ do
   fi
     
   OperId=$(aws --profile innovation cloudformation "${AwsCliCmd}-stack-instances"       \
-      --stack-set-name ${StackSetName} --accounts "${AccNum}" --regions  "${RegName}"   \
-      --parameter-overrides file://../45-aws-cli-params/simple-ec2-params.json 2> /dev/null | jq '.OperationId')
+               --stack-set-name ${StackSetName} ${OperPrefsWithFile}                    \
+               --accounts "${AccNum}" --regions  "${RegName}"                           \
+               --parameter-overrides file://../45-aws-cli-params/simple-ec2-params.json \
+               2 > /dev/null | jq '.OperationId')
 
   echo "Operation id: ${OperId}"
   while true
